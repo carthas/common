@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.carthas"
-version = "0.1.2"
+version = "0.1.4"
 
 kotlin {
     jvm()
