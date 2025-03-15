@@ -11,7 +11,6 @@ koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 jetbrainsx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "jetbrainsx-lifecycle" }
-jetbrainsx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "jetbrainsx-lifecycle" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

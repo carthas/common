@@ -3,6 +3,7 @@
 import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -51,6 +52,12 @@ kotlin {
 android {
     namespace = "com.carthas.ui.base"
     compileSdk = 34
+}
+
+tasks.withType<KotlinCompile>().all {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
 }
 
 mavenPublishing {
