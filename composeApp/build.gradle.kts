@@ -1,17 +1,61 @@
 @file:OptIn(ExperimentalWasmDsl::class)
 
 import com.vanniktech.maven.publish.SonatypeHost
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.androidLibrary)
     alias(libs.plugins.mavenPublish)
+}
+
+group = "com.carthas"
+version = "0.1.2"
+
+kotlin {
+    jvm()
+
+    androidTarget {
+        publishLibraryVariants("release")
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_11)
+        }
+    }
+
+    js(IR) {
+        nodejs()
+        browser()
+        binaries.executable()
+    }
+
+    wasmJs {
+        nodejs()
+        binaries.executable()
+    }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+    macosX64()
+    macosArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(compose.runtime)
+            implementation(libs.jetbrainsx.lifecycle.viewmodel)
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose.viewmodel)
+        }
+    }
+}
+
+android {
+    namespace = "com.carthas.ui.base"
+    compileSdk = 34
 }
 
 mavenPublishing {
@@ -41,42 +85,9 @@ mavenPublishing {
             }
         }
         scm {
-            url = "https://github.com/carthas/ui-base/"
+            url = "https://github.com/carthas/cmp-mvvm/"
             connection = "scm:git:git://github.com/carthas/cmp-mvvm"
             developerConnection = "scm:git:ssh://git@github.com/carthas/cmp-mvvm.git"
-        }
-    }
-}
-
-kotlin {
-    jvmToolchain(1_8)
-
-    jvm()
-
-    js(IR) {
-        nodejs()
-        browser()
-        binaries.executable()
-    }
-
-    wasmJs {
-        nodejs()
-        binaries.executable()
-    }
-
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-    macosX64()
-    macosArm64()
-
-    sourceSets {
-        commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(libs.jetbrainsx.lifecycle.viewmodel)
-            implementation(project.dependencies.platform(libs.koin.bom))
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose.viewmodel)
         }
     }
 }
