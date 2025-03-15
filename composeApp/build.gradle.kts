@@ -18,12 +18,7 @@ version = "0.1.2"
 kotlin {
     jvm()
 
-    androidTarget {
-        publishLibraryVariants("release")
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
-        }
-    }
+    androidTarget()
 
     js(IR) {
         nodejs()
@@ -69,7 +64,7 @@ mavenPublishing {
         name = "Carthas CMP MVVM library"
         description = "A lightweight framework for compose multiplatform MVVM development"
         inceptionYear = "2025"
-        url = "https://github.com/carthas/ui-base/"
+        url = "https://github.com/carthas/cmp-mvvm/"
         licenses {
             license {
                 name = "The Apache License, Version 2.0"
