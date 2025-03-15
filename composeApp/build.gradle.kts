@@ -17,6 +17,8 @@ group = "com.carthas"
 version = "0.1.4"
 
 kotlin {
+    jvmToolchain(21)
+
     jvm()
 
     androidTarget()
