@@ -2,8 +2,8 @@ Usage
 
 ```
 [versions]
-carthas-ui-base = "0.1.5"
+carthas-common = "0.2.0"
 
 [libraries]
-carthas-ui-base = { module = "com.carthas:cmp-mvvm", version.ref = "carthas-ui-base" }
+carthas-common = { module = "com.carthas:common", version.ref = "carthas-common" }
 ```

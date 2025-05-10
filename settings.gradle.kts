@@ -1,4 +1,4 @@
-rootProject.name = "base"
+rootProject.name = "carthas-common"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

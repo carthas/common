@@ -14,7 +14,7 @@ plugins {
 }
 
 group = "com.carthas"
-version = "0.1.5"
+version = "0.2.0"
 
 kotlin {
     jvmToolchain(21)
@@ -42,8 +42,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            // compose
             implementation(compose.runtime)
             implementation(libs.jetbrainsx.lifecycle.viewmodel)
+
+            // koin
             implementation(project.dependencies.platform(libs.koin.bom))
             implementation(libs.koin.core)
             implementation(libs.koin.compose.viewmodel)
@@ -52,7 +55,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.carthas.ui.base"
+    namespace = "com.carthas.common"
     compileSdk = 34
 }
 
@@ -70,10 +73,10 @@ mavenPublishing {
     coordinates(group.toString(), "cmp-mvvm", version.toString())
 
     pom {
-        name = "Carthas CMP MVVM library"
-        description = "A lightweight framework for compose multiplatform MVVM development"
+        name = "Carthas common library"
+        description = "A common set of tools used for Compose Multiplatform development"
         inceptionYear = "2025"
-        url = "https://github.com/carthas/cmp-mvvm/"
+        url = "https://github.com/carthas/common/"
         licenses {
             license {
                 name = "The Apache License, Version 2.0"
@@ -89,9 +92,9 @@ mavenPublishing {
             }
         }
         scm {
-            url = "https://github.com/carthas/cmp-mvvm/"
-            connection = "scm:git:git://github.com/carthas/cmp-mvvm"
-            developerConnection = "scm:git:ssh://git@github.com/carthas/cmp-mvvm.git"
+            url = "https://github.com/carthas/common/"
+            connection = "scm:git:git://github.com/carthas/common"
+            developerConnection = "scm:git:ssh://git@github.com/carthas/common.git"
         }
     }
 }
