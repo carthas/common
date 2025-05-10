@@ -1,5 +1,6 @@
 package com.carthas.common.ui
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
@@ -46,7 +47,8 @@ interface ShaderUniformProvider {
  */
 open class Shader(
     val skslCode: String,
-    val defineUniformsBlock: ShaderUniformProvider.() -> Unit,
+    val defineUniformsBlock: ShaderUniformProvider.() -> Unit = {},
+    val defineDynamicUniformsBlock: @Composable ShaderUniformProvider.() -> Unit = {},
 )
 
 /**

@@ -3,7 +3,9 @@ package com.carthas.common.ui
 import android.graphics.RuntimeShader
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -79,36 +81,68 @@ private fun RuntimeShader.defineUniforms(
     .let { this }
 
 /**
- * Converts a [Shader] into a [ShaderBrush] by defining its uniforms and applying the provided size and density
- * parameters as default uniforms. It uses a [RuntimeShader] to process the shader's SkSL code and uniforms.
+ * Defines dynamic uniforms for a [RuntimeShader] using the provided composable lambda.
  *
- * @param size The size of the area to which the shader will be applied, represented as a [Size].
- * @param density The pixel density of the display or rendering context.
- * @return A [ShaderBrush] created based on the configured [Shader].
+ * @param defineDynamicUniforms A composable lambda function that defines and sets dynamic
+ * uniform values for the shader.
+ * @return The same [RuntimeShader] instance with the dynamic uniforms configured.
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-private fun Shader.toShaderBrush(
+@Composable
+private fun RuntimeShader.defineDynamicUniforms(
+    defineDynamicUniforms: @Composable ShaderUniformProvider.() -> Unit,
+): RuntimeShader = AndroidShaderUniformProvider(this)
+    .defineDynamicUniforms()
+    .let { this }
+
+/**
+ * Converts the current [Shader] instance to a [RuntimeShader] object, enabling the use
+ * of its SkSL code and uniform configuration for rendering. This function uses the
+ * defined blocks of static and dynamic uniform configurations from the [Shader]
+ * to initialize the resulting [RuntimeShader].
+ *
+ * @return A [RuntimeShader] instance configured with the SkSL code and uniform settings
+ * from this [Shader].
+ */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@Composable
+private fun Shader.toRuntimeShader(): RuntimeShader = RuntimeShader(this.skslCode)
+    .defineUniforms(this.defineUniformsBlock)
+    .defineDynamicUniforms(this.defineDynamicUniformsBlock)
+
+/**
+ * Converts a [RuntimeShader] into a [ShaderBrush] after defining required uniforms.
+ *
+ * @param size The dimensions of the target area on which the shader will be drawn.
+ * @param density The display density to be used as a uniform for the shader.
+ * @return A [ShaderBrush] instance for use in rendering.
+ */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun RuntimeShader.toShaderBrush(
     size: Size,
     density: Float,
-): ShaderBrush = RuntimeShader(this.skslCode)
+): ShaderBrush = this
     .defineUniforms {
         uniform("resolution", size.width, size.height)
         uniform("density", density)
     }
-    .defineUniforms(this.defineUniformsBlock)
     .let { ShaderBrush(it) }
 
 /**
- * Adds a custom shader effect to the current [Modifier]. This function applies the provided SkSL-based [Shader]
- * to modify the visual appearance of the content being rendered.
+ * Applies a custom SkSL-based shader to the current [Modifier]. The provided [Shader] defines both
+ * the shader program and the associated uniform variables to customize the visual rendering.
  *
- * @param shader The [Shader] object containing the SkSL code and its uniform configurations to generate the visual effect.
- * @return A [Modifier] with the applied shader effect.
+ * @param shader The [Shader] containing the SkSL program and uniform definitions used to create a
+ *               runtime shader. This shader is used to draw using a custom [ShaderBrush].
+ * @return A [Modifier] that applies the specified shader effect during drawing.
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-actual fun Modifier.shader(shader: Shader): Modifier = drawWithCache {
-    val shaderBrush = shader.toShaderBrush(size, density)
-    onDrawBehind {
-        drawRect(shaderBrush)
+actual fun Modifier.shader(shader: Shader): Modifier = this then composed {
+    val runtimeShader = shader.toRuntimeShader()
+    drawWithCache {
+        val shaderBrush = runtimeShader.toShaderBrush(size, density)
+        onDrawBehind {
+            drawRect(shaderBrush)
+        }
     }
 }
