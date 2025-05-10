@@ -28,7 +28,7 @@ private class SkiaShaderUniformProvider(
      * @param name The name of the uniform variable in the shader program.
      * @param value The color value to assign to the uniform variable.
      */
-    override fun uniform(name: String, value: Color) = uniform(name, value.red, value.green, value.blue)
+    override fun uniform(name: String, value: Color) = uniform(name, value.red, value.green, value.blue, value.alpha)
 
     /**
      * Sets uniform data for the target shader with a variable number of integer values.
@@ -69,6 +69,7 @@ private class SkiaShaderUniformProvider(
      * @throws IllegalArgumentException Always thrown with a message indicating the error.
      */
     private fun throwEmpty(): Nothing = throw IllegalArgumentException("must provide at least 1 value for SkSL uniform")
+
     /**
      * Throws an exception indicating that too many arguments were provided for a uniform.
      *
