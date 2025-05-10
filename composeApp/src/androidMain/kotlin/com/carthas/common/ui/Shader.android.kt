@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ShaderBrush
 import kotlin.IllegalArgumentException
@@ -78,18 +79,35 @@ private fun RuntimeShader.defineUniforms(
     .let { this }
 
 /**
- * Applies a custom shader to the current modifier by utilizing the provided shader configuration by using Android
- * AGSL runtime APIs.
+ * Converts a [Shader] into a [ShaderBrush] by defining its uniforms and applying the provided size and density
+ * parameters as default uniforms. It uses a [RuntimeShader] to process the shader's SkSL code and uniforms.
  *
- * @param shader The Shader object containing the SkSL(AGSL) code and uniform definitions to apply.
- * @return A Modifier with the custom shader applied.
+ * @param size The size of the area to which the shader will be applied, represented as a [Size].
+ * @param density The pixel density of the display or rendering context.
+ * @return A [ShaderBrush] created based on the configured [Shader].
+ */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun Shader.toShaderBrush(
+    size: Size,
+    density: Float,
+): ShaderBrush = RuntimeShader(this.skslCode)
+    .defineUniforms {
+        uniform("resolution", size.width, size.height)
+        uniform("density", density)
+    }
+    .defineUniforms(this.defineUniformsBlock)
+    .let { ShaderBrush(it) }
+
+/**
+ * Adds a custom shader effect to the current [Modifier]. This function applies the provided SkSL-based [Shader]
+ * to modify the visual appearance of the content being rendered.
+ *
+ * @param shader The [Shader] object containing the SkSL code and its uniform configurations to generate the visual effect.
+ * @return A [Modifier] with the applied shader effect.
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 actual fun Modifier.shader(shader: Shader): Modifier = drawWithCache {
-    val runtimeShader = RuntimeShader(shader.skslCode)
-        .defineUniforms { resolution(size) }
-        .defineUniforms(shader.defineUniformsBlock)
-    val shaderBrush = ShaderBrush(runtimeShader)
+    val shaderBrush = shader.toShaderBrush(size, density)
     onDrawBehind {
         drawRect(shaderBrush)
     }

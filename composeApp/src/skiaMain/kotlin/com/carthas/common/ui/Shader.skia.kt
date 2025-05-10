@@ -7,6 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.Density
 import org.jetbrains.skia.ImageFilter
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
@@ -92,22 +93,28 @@ private fun RuntimeShaderBuilder.defineUniforms(
     .let { this }
 
 /**
- * Converts this [Shader] instance into a [RenderEffect] using the specified [Size].
+ * Converts this [Shader] instance into a [RenderEffect] using the specified [Size] and density.
  *
  * The method creates a runtime effect from the shader's SkSL code, configures shader uniforms,
- * and builds a runtime shader with the provided size. This is then used to create an image filter
+ * and builds a runtime shader with the provided size and density. This is then used to create an image filter
  * which is converted to a [RenderEffect] compatible with Compose.
  *
  * @param size The size object containing the width and height used to define the resolution for the shader.
  * @return A [RenderEffect] created from the given [Shader], which can be applied in Compose rendering layers.
  */
-private fun Shader.toRenderEffect(size: Size): RenderEffect {
+private fun Shader.toRenderEffect(
+    size: Size,
+    density: Float,
+): RenderEffect {
     val runtimeEffect = RuntimeEffect.makeForShader(
         sksl = this.skslCode,
     )
     val runtimeShader = RuntimeShaderBuilder(effect = runtimeEffect)
+        .defineUniforms {
+            uniform("resolution", size.width, size.height)
+            uniform("density", density)
+        }
         .defineUniforms(this@toRenderEffect.defineUniformsBlock)
-        .defineUniforms { resolution(size) }
         .makeShader()
     val imageFilter = ImageFilter.makeShader(
         shader = runtimeShader,
@@ -128,6 +135,6 @@ actual fun Modifier.shader(
 ): Modifier = this then composed {
     graphicsLayer {
         clip = true
-        renderEffect = shader.toRenderEffect(size)
+        renderEffect = shader.toRenderEffect(size, density)
     }
 }

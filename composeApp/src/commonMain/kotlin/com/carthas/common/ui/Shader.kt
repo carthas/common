@@ -1,7 +1,6 @@
 package com.carthas.common.ui
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 
 
@@ -35,13 +34,6 @@ interface ShaderUniformProvider {
      * @param values One or more float values to assign to the uniform variable.
      */
     fun uniform(name: String, vararg values: Float)
-
-    /**
-     * Sets the resolution uniform for a shader using the specified size.
-     *
-     * @param size The size containing the width and height used to define the resolution.
-     */
-    fun resolution(size: Size) = uniform("resolution", size.width, size.height)
 }
 
 /**
