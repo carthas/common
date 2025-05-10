@@ -13,27 +13,16 @@ plugins {
     alias(libs.plugins.mavenPublish)
 }
 
-group = "com.carthas"
-version = "0.2.0"
-
 kotlin {
     jvmToolchain(21)
 
+    // define targets
     jvm()
-
     androidTarget()
-
-    js(IR) {
-        nodejs()
-        browser()
-        binaries.executable()
-    }
-
     wasmJs {
         nodejs()
         binaries.executable()
     }
-
     iosX64()
     iosArm64()
     iosSimulatorArm64()
@@ -41,15 +30,44 @@ kotlin {
     macosArm64()
 
     sourceSets {
-        commonMain.dependencies {
-            // compose
-            implementation(compose.runtime)
-            implementation(libs.jetbrainsx.lifecycle.viewmodel)
+        val commonMain by getting {
+            dependencies {
+                // compose
+                implementation(compose.runtime)
+                implementation(libs.jetbrainsx.lifecycle.viewmodel)
 
-            // koin
-            implementation(project.dependencies.platform(libs.koin.bom))
-            implementation(libs.koin.core)
-            implementation(libs.koin.compose.viewmodel)
+                // koin
+                implementation(project.dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose.viewmodel)
+            }
+        }
+
+        // all platforms using skia
+        val skiaMain by creating {
+            dependsOn(commonMain)
+        }
+
+        listOf(
+            jvmMain,
+            wasmJsMain,
+            nativeMain,
+        ).forEach {
+            it.get().dependsOn(skiaMain)
+        }
+
+        val nativeMain by getting {
+            dependsOn(skiaMain)
+        }
+
+        listOf(
+            iosX64Main,
+            iosArm64Main,
+            iosSimulatorArm64Main,
+            macosX64Main,
+            macosArm64Main,
+        ).forEach {
+            it.get().dependsOn(nativeMain)
         }
     }
 }
@@ -65,12 +83,16 @@ tasks.withType<KotlinCompile>().all {
     }
 }
 
+group = "com.carthas"
+val artifactId = "common"
+version = "0.2.0"
+
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
 
     signAllPublications()
 
-    coordinates(group.toString(), "cmp-mvvm", version.toString())
+    coordinates(group.toString(), artifactId, version.toString())
 
     pom {
         name = "Carthas common library"
