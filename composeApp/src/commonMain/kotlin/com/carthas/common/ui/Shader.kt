@@ -44,6 +44,7 @@ interface ShaderUniformProvider {
  * @param skslCode The SkSL code defining the shader program. This code is passed directly to the rendering pipeline
  * and adheres to SkSL standards.
  * @param defineUniformsBlock A lambda that enables the configuration of shader uniforms.
+ * @param defineDynamicUniformsBlock A [Composable] lambda that enables configuration of dynamic shader uniforms.
  */
 open class Shader(
     val skslCode: String,
