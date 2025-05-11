@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.ShaderBrush
  * @param uniform The uniform to be applied, which can be an instance of IntUniform, FloatUniform, or ColorUniform.
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-private fun RuntimeShader.applyUniform(uniform: Uniform<Any>) = when (uniform) {
+private fun RuntimeShader.applyUniform(uniform: Uniform<*>) = when (uniform) {
     is IntUniform -> setIntUniform(uniform.name, uniform.value)
     is FloatUniform -> setFloatUniform(uniform.name, uniform.value)
     is ColorUniform -> setColorUniform(

@@ -57,7 +57,7 @@ private fun RuntimeShaderBuilder.floatUniform(
  * @param uniform The uniform to apply to the shader builder. It may be an instance of
  * [IntUniform], [FloatUniform], or [ColorUniform].
  */
-private fun RuntimeShaderBuilder.applyUniform(uniform: Uniform<Any>) = when (uniform) {
+private fun RuntimeShaderBuilder.applyUniform(uniform: Uniform<*>) = when (uniform) {
     is IntUniform -> intUniform(uniform.name, uniform.value)
     is FloatUniform -> floatUniform(uniform.name, uniform.value)
     is ColorUniform -> uniform(

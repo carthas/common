@@ -1,6 +1,5 @@
 package com.carthas.common.ui.shader
 
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 class CarthasShader(
     val skslCode: String,
-    initialUniforms: Set<Uniform<Any>>,
+    initialUniforms: Set<Uniform<*>>,
 ) {
     /**
      * A mutable state flow that holds the current set of uniforms for the shader.
@@ -29,11 +28,7 @@ class CarthasShader(
      * are a collection of configurable parameters that define the behavior or appearance of
      * the shader.
      *
-     * This flow allows real-time updates to the shader's uniform variables. Consumers of this
-     * property can subscribe to changes and react accordingly, enabling dynamic shader behavior.
-     *
-     * The set of uniforms includes various configurations such as integers, floats, or colors,
-     * encapsulated within the `Uniform` type.
+     * This flow allows real-time updates to the shader's uniform variables.
      */
     val uniformsFlow = _uniformsFlow.asStateFlow()
 
