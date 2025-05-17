@@ -15,6 +15,7 @@ plugins {
 
 kotlin {
     jvmToolchain(21)
+    metadata()
 
     // define targets
     jvm()
@@ -32,9 +33,12 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
+                // arrow
+                implementation(project.dependencies.platform(libs.arrow.bom))
+                implementation(libs.arrow.core)
+
                 // compose
                 implementation(compose.runtime)
-                implementation(libs.jetbrainsx.lifecycle.viewmodel)
 
                 // koin
                 implementation(project.dependencies.platform(libs.koin.bom))
@@ -74,7 +78,7 @@ kotlin {
 
 android {
     namespace = "com.carthas.common"
-    compileSdk = 34
+    compileSdk = 36
 }
 
 tasks.withType<KotlinCompile>().all {
@@ -85,7 +89,7 @@ tasks.withType<KotlinCompile>().all {
 
 group = "com.carthas"
 val artifactId = "common"
-version = "0.2.5"
+version = "0.2.6-SNAPSHOT"
 
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)

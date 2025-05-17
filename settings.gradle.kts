@@ -1,4 +1,4 @@
-rootProject.name = "carthas-common"
+rootProject.name = "common"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
@@ -28,4 +28,4 @@ dependencyResolutionManagement {
     }
 }
 
-include(":composeApp")
+include(":lib")

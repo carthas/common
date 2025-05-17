@@ -1,16 +1,17 @@
 [versions]
-agp = "8.7.3"
-jetbrainsx-lifecycle = "2.8.4"
+agp = "8.11.0-alpha03"
+arrow = "2.1.2"
 compose-multiplatform = "1.8.0"
-koin = "4.0.2"
-kotlin = "2.1.20"
-maven-publish = "0.31.0"
+koin = "4.0.4"
+kotlin = "2.1.21"
+maven-publish = "0.32.0"
 
 [libraries]
+arrow-bom = { module = "io.arrow-kt:arrow-stack", version.ref = "arrow" }
+arrow-core = { module = "io.arrow-kt:arrow-core" }
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
-jetbrainsx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "jetbrainsx-lifecycle" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
