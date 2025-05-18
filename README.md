@@ -5,16 +5,12 @@
 
 **Carthas Common** is a collection of utilities designed to streamline development with [Compose Multiplatform](https://www.jetbrains.com/lp/compose-multiplatform/). It offers shared tools and abstractions to enhance code reuse and maintainability across Android, iOS, desktop, and web platforms.
 
----
-
 ## ✨ Features
 
 - Cross-platform utilities for Compose Multiplatform projects  
 - Modifier.shader implementations for custom SkSL shader application
 - Lightweight MVVM base classes and fully object-oriented navigation
-- Compatible with Compose for Android, Desktop, iOS, and Web (Wasm)  
-
----
+- Compatible with Compose for Android, Desktop, iOS, and Web (Wasm)
 
 ## 📦 Installation
 ### Requirements
