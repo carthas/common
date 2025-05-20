@@ -20,7 +20,7 @@ Add the following to your `libs.versions.toml` file:
 
 ```toml
 [versions]
-carthas-common = "0.3"
+carthas-common = "0.3.1"
 
 [libraries]
 carthas-common = { module = "com.carthas:common", version.ref = "carthas-common" }
