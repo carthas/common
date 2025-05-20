@@ -3,14 +3,10 @@ package com.carthas.common.ui.shader
 import android.graphics.RuntimeShader
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -21,58 +17,23 @@ import androidx.compose.ui.graphics.graphicsLayer
  *
  * @param carthasShader The [CarthasShader] instance containing the shader's SkSL code, static uniforms,
  * and time as state.
- * @return The modified [Modifier] with the specified shader effect applied.
+ * @return The [Modifier] with the specified shader effect applied.
  */
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 actual fun Modifier.shader(carthasShader: CarthasShader): Modifier = composed {
     val time by carthasShader.currentTime
-    val runtimeShader = rememberRuntimeShader(carthasShader)
-
-    var lastSize by remember { mutableStateOf(Size.Unspecified) }
-    var lastDensity by remember { mutableStateOf(-1f) }
-    var lastTime by remember { mutableStateOf(-1f) }
+    val runtimeShader = remember { RuntimeShader(carthasShader.skslCode) }
 
     graphicsLayer {
-        val needsUpdate = size != lastSize ||
-                density != lastDensity ||
-                time != lastTime
-        fun updateLastValues() {
-            lastSize = size
-            lastDensity = density
-            lastTime = time
-        }
-        fun RuntimeShader.updateUniforms() {
+        runtimeShader.apply {
             setFloatUniform("resolution", size.width, size.height)
             setFloatUniform("density", density)
             setFloatUniform("time", time)
-        }
-
-        if (needsUpdate) {
-            runtimeShader.updateUniforms()
-            updateLastValues()
+            carthasShader.staticUniforms.forEach { applyUniform(it) }
         }
 
         clip = true
         renderEffect = runtimeShader.toRenderEffect()
-    }
-}
-
-/**
- * Creates and remembers a [RuntimeShader] based on the given [CarthasShader].
- * The function applies all static uniforms defined in the provided [CarthasShader]
- * to the created [RuntimeShader].
- *
- * @param carthasShader An instance of [CarthasShader] containing the SkSL shader code
- * and related static uniforms.
- * @return A remembered [RuntimeShader] instance.
- */
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-@Composable
-private fun rememberRuntimeShader(carthasShader: CarthasShader): RuntimeShader = remember {
-    RuntimeShader(carthasShader.skslCode).apply {
-        carthasShader.staticUniforms.forEach {
-            applyUniform(it)
-        }
     }
 }
 

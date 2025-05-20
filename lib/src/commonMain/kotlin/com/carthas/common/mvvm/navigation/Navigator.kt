@@ -30,6 +30,8 @@ val LocalNavigator: ProvidableCompositionLocal<Navigator> =
  * active screen.
  */
 interface Navigator {
+    // TODO: transition animation via [org.jetbrains.compose.animation.AnimatedContent]
+
     /**
      * Represents the current navigation stack in the application. This stack is a list of [Screen] instances,
      * where each instance corresponds to a screen within the navigation flow. The stack's state determines

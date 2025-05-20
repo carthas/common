@@ -1,12 +1,9 @@
 package com.carthas.common.ui.shader
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
@@ -20,43 +17,20 @@ import org.jetbrains.skia.RuntimeShaderBuilder
  *
  * @param carthasShader The [CarthasShader] instance containing the shader's SkSL code, static uniforms,
  * and time as state.
- * @return The modified [Modifier] with the specified shader effect applied.
+ * @return The [Modifier] with the specified shader effect applied.
  */
 actual fun Modifier.shader(carthasShader: CarthasShader): Modifier = composed {
     val time by carthasShader.currentTime
     val runtimeEffect = remember { RuntimeEffect.makeForShader(sksl = carthasShader.skslCode) }
-    val shaderBuilder = remember {
-        RuntimeShaderBuilder(runtimeEffect).apply {
-            carthasShader.staticUniforms.forEach {
-                applyUniform(it)
-            }
-        }
-    }
-
-    var lastSize by remember { mutableStateOf(Size.Unspecified) }
-    var lastDensity by remember { mutableStateOf(-1f) }
-    var lastTime by remember { mutableStateOf(-1f) }
+    val shaderBuilder = remember { RuntimeShaderBuilder(runtimeEffect) }
 
     graphicsLayer {
-        val needsUpdate = size != lastSize ||
-                density != lastDensity ||
-                time != lastTime
-        fun updateLastValues() {
-            lastSize = size
-            lastDensity = density
-            lastTime = time
-        }
-        fun RuntimeShaderBuilder.updateUniforms() {
+        shaderBuilder.apply {
             uniform("resolution", size.width, size.height)
             uniform("density", density)
             uniform("time", time)
+            carthasShader.staticUniforms.forEach { applyUniform(it) }
         }
-
-        if (needsUpdate) {
-            shaderBuilder.updateUniforms()
-            updateLastValues()
-        }
-
         clip = true
         renderEffect = shaderBuilder.toRenderEffect()
     }
