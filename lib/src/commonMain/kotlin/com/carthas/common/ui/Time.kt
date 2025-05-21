@@ -14,13 +14,13 @@ import kotlin.time.TimeSource
 
 /**
  * A producer for providing time as an input to shaders based on a specified refresh rate.
- * The `ShaderTimeProducer` generates time values that can be utilized to create animations
+ * The `AnimationTimeProducer` generates time values that can be utilized to create animations
  * or dynamic effects in shader-based graphics rendering.
  *
  * @param refreshRate The frequency, in hertz (Hz), at which time updates are produced.
  */
 @Stable
-open class ShaderTimeProducer(refreshRate: Hz) {
+open class AnimationTimeProducer(refreshRate: Hz) {
     /**
      * [Flow] that emits the elapsed time in seconds since its creation.
      * The emission frequency is determined by [refreshRate].
@@ -57,9 +57,9 @@ open class ShaderTimeProducer(refreshRate: Hz) {
 
     companion object {
         /**
-         * A default instance of [ShaderTimeProducer] with a refresh rate of 60 Hz.
+         * A default instance of [AnimationTimeProducer] with a refresh rate of 60 Hz.
          */
-        val Default by lazy { ShaderTimeProducer(refreshRate = 60.Hz) }
+        val Default by lazy { AnimationTimeProducer(refreshRate = 60.Hz) }
     }
 }
 

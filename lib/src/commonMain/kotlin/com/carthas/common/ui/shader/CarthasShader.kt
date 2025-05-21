@@ -7,7 +7,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.carthas.common.ui.ShaderTimeProducer
+import com.carthas.common.ui.AnimationTimeProducer
 import com.carthas.common.ext.fold
 
 
@@ -19,7 +19,7 @@ import com.carthas.common.ext.fold
  *
  * @property staticUniforms A set of static [Uniform] parameters used by the shader.
  *
- * @property shaderTimeProducer Optional time producer that provides a stateful
+ * @property animationTimeProducer Optional time producer that provides a stateful
  * flow of time values which can be used within the shader logic to create
  * time-based animations.
  */
@@ -27,18 +27,18 @@ import com.carthas.common.ext.fold
 class CarthasShader(
     val skslCode: String,
     val staticUniforms: Set<Uniform<*>>,
-    val shaderTimeProducer: ShaderTimeProducer? = null,
+    val animationTimeProducer: AnimationTimeProducer? = null,
 ){
     /**
      * The shader's `time` input.
      *
-     * - If [shaderTimeProducer] is present, this is a dynamically updated state with the produced time.
+     * - If [animationTimeProducer] is present, this is a dynamically updated state with the produced time.
      * - If not, it is just `0f`.
      */
     @Stable
     @get:Composable
     val currentTime: State<Float>
-        get() = shaderTimeProducer.fold(
+        get() = animationTimeProducer.fold(
             { remember { mutableStateOf(0f) } },
             { it.collectTimeAsState() },
         )
