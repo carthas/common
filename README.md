@@ -9,12 +9,12 @@
 
 - Cross-platform utilities for Compose Multiplatform projects  
 - Modifier.shader implementations for custom SkSL shader application
-- Lightweight MVVM base classes and fully object-oriented navigation
+- Lightweight MVI base classes and fully object-oriented navigation
 - Compatible with Compose for Android, Desktop, iOS, and Web (Wasm)
 
 ## 📦 Installation
 ### Requirements
-- In order for your `Screen` implementations to receive a `CarthasViewModel` instance via the `content` DSL function, you must have [Koin](https://github.com/InsertKoinIO/koin) set up in your application, with `viewModel` definitions for all your `CarthasViewModel` implementations.
+- In order for your `Screen` implementations to be able to use the `content` DSL function, you must have [Koin](https://github.com/InsertKoinIO/koin) set up in your application, with `viewModel` definitions for all your `CarthasViewModel` implementations.
 
 Add the following to your `libs.versions.toml` file:
 
