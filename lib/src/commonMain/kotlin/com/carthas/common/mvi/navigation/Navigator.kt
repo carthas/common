@@ -1,9 +1,10 @@
-package com.carthas.common.mvvm.navigation
+package com.carthas.common.mvi.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.carthas.common.mvvm.Screen
+import com.carthas.common.mvi.Screen
+
 
 /**
  * A CompositionLocal that provides access to a [Navigator] instance within a Compose hierarchy.
@@ -19,8 +20,7 @@ import com.carthas.common.mvvm.Screen
  * Designed to facilitate navigation in a fully object-oriented manner by sharing a navigator instance
  * across a composition.
  */
-val LocalNavigator: ProvidableCompositionLocal<Navigator> =
-    staticCompositionLocalOf { error("no navigator provided") }
+val LocalNavigator: ProvidableCompositionLocal<Navigator> = staticCompositionLocalOf { NoNavigator }
 
 /**
  * Navigator defines an interface for managing the navigation stack in an application.
@@ -114,4 +114,10 @@ interface Navigator {
     fun CurrentScreen() {
         currentStack.last().Content()
     }
+}
+
+object NoNavigator : Navigator {
+    override var currentStack: List<Screen>
+        get() = throw IllegalStateException("No Navigator is provided.")
+        set(_) = throw IllegalStateException("No Navigator is provided.")
 }

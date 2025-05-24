@@ -1,4 +1,4 @@
-package com.carthas.common.mvvm.navigation
+package com.carthas.common.mvi.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter

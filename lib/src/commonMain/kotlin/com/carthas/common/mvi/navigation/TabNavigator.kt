@@ -1,9 +1,9 @@
-package com.carthas.common.mvvm.navigation
+package com.carthas.common.mvi.navigation
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.carthas.common.mvvm.Screen
+import com.carthas.common.mvi.Screen
 import kotlin.collections.plus
 
 /**
