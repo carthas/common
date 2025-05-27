@@ -21,15 +21,20 @@ import org.jetbrains.skia.RuntimeShaderBuilder
  */
 actual fun Modifier.shader(carthasShader: CarthasShader): Modifier = composed {
     val time by carthasShader.currentTime
-    val runtimeEffect = remember { RuntimeEffect.makeForShader(sksl = carthasShader.skslCode) }
-    val shaderBuilder = remember { RuntimeShaderBuilder(runtimeEffect) }
+    val runtimeEffect = remember(carthasShader.skSLCode) {
+        RuntimeEffect.makeForShader(sksl = carthasShader.skSLCode)
+    }
+    val shaderBuilder = remember(carthasShader.skSLCode, carthasShader.staticUniforms) {
+        RuntimeShaderBuilder(runtimeEffect).apply {
+            carthasShader.staticUniforms.uniforms.forEach { applyUniform(it) }
+        }
+    }
 
     graphicsLayer {
         shaderBuilder.apply {
             uniform("resolution", size.width, size.height)
             uniform("density", density)
             uniform("time", time)
-            carthasShader.staticUniforms.forEach { applyUniform(it) }
         }
         clip = true
         renderEffect = shaderBuilder.toRenderEffect()

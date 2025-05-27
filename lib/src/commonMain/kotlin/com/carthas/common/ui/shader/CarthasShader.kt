@@ -12,10 +12,19 @@ import com.carthas.common.ext.fold
 
 
 /**
+ * Adds a custom SkSL shader to the [Modifier] pipeline.
+ *
+ * @param carthasShader The [CarthasShader] instance containing the shader's SkSL code, static uniforms,
+ * and time as state.
+ * @return The modified [Modifier] with the specified shader effect applied.
+ */
+expect fun Modifier.shader(carthasShader: CarthasShader): Modifier
+
+/**
  * Represents a custom Skia Shading Language (SkSL) shader that can be used in
  * Compose UI to apply complex graphical effects to UI components.
  *
- * @property skslCode A string containing the SkSL shader code.
+ * @property skSLCode A string containing the SkSL shader code.
  *
  * @property staticUniforms A set of static [Uniform] parameters used by the shader.
  *
@@ -25,8 +34,8 @@ import com.carthas.common.ext.fold
  */
 @Immutable
 class CarthasShader(
-    val skslCode: String,
-    val staticUniforms: Set<Uniform<*>>,
+    val skSLCode: String,
+    val staticUniforms: UniformSet = UniformSet.Empty,
     val animationTimeProducer: AnimationTimeProducer? = null,
 ){
     /**
@@ -44,12 +53,9 @@ class CarthasShader(
         )
 }
 
-/**
- * Adds a custom SkSL shader to the [Modifier] pipeline.
- *
- * @param carthasShader The [CarthasShader] instance containing the shader's SkSL code, static uniforms,
- * and time as state.
- * @return The modified [Modifier] with the specified shader effect applied.
- */
-expect fun Modifier.shader(carthasShader: CarthasShader): Modifier
-
+@Immutable
+value class UniformSet(val uniforms: Set<Uniform<*>>) {
+    companion object {
+        val Empty = UniformSet(emptySet())
+    }
+}

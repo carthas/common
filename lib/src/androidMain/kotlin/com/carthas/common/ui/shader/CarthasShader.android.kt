@@ -22,18 +22,24 @@ import androidx.compose.ui.graphics.graphicsLayer
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
 actual fun Modifier.shader(carthasShader: CarthasShader): Modifier = composed {
     val time by carthasShader.currentTime
-    val runtimeShader = remember { RuntimeShader(carthasShader.skslCode) }
+    val runtimeShader = remember(carthasShader.skSLCode) {
+        RuntimeShader(carthasShader.skSLCode)
+    }
+    val shaderWithStaticUniforms = remember(carthasShader.skSLCode, carthasShader.staticUniforms) {
+        runtimeShader.apply {
+            carthasShader.staticUniforms.uniforms.forEach { applyUniform(it) }
+        }
+    }
 
     graphicsLayer {
-        runtimeShader.apply {
+        shaderWithStaticUniforms.apply {
             setFloatUniform("resolution", size.width, size.height)
             setFloatUniform("density", density)
             setFloatUniform("time", time)
-            carthasShader.staticUniforms.forEach { applyUniform(it) }
         }
 
         clip = true
-        renderEffect = runtimeShader.toRenderEffect()
+        renderEffect = shaderWithStaticUniforms.toRenderEffect()
     }
 }
 
