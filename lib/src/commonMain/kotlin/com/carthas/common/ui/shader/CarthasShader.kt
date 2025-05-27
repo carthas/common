@@ -7,9 +7,13 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.carthas.common.ui.AnimationTimeProducer
 import com.carthas.common.ext.fold
+import com.carthas.common.ui.AnimationTimeProducer
+import kotlin.jvm.JvmInline
 
+
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+expect class CompiledShader
 
 /**
  * Adds a custom SkSL shader to the [Modifier] pipeline.
@@ -37,7 +41,7 @@ class CarthasShader(
     val skSLCode: String,
     val staticUniforms: UniformSet = UniformSet.Empty,
     val animationTimeProducer: AnimationTimeProducer? = null,
-){
+) {
     /**
      * The shader's `time` input.
      *
@@ -53,9 +57,20 @@ class CarthasShader(
         )
 }
 
+/**
+ * A wrapper class for a set of shader uniform definitions. This class is used as a [remember] key for compositional caching.
+ *
+ * @property uniforms The set of [Uniform] instances.
+ */
+@JvmInline
 @Immutable
 value class UniformSet(val uniforms: Set<Uniform<*>>) {
+
     companion object {
+        /**
+         * Represents an empty [UniformSet] with no uniforms.
+         * Useful as a default or placeholder value when no uniforms are needed.
+         */
         val Empty = UniformSet(emptySet())
     }
 }

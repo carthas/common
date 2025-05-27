@@ -10,7 +10,13 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
+import com.carthas.common.ext.orElse
 
+
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+actual typealias CompiledShader = RuntimeShader
+
+private val compiledShaderCache = mutableMapOf<String, CompiledShader>()
 
 /**
  * Adds a custom SkSL shader to the [Modifier] pipeline.
@@ -23,7 +29,12 @@ import androidx.compose.ui.graphics.graphicsLayer
 actual fun Modifier.shader(carthasShader: CarthasShader): Modifier = composed {
     val time by carthasShader.currentTime
     val runtimeShader = remember(carthasShader.skSLCode) {
-        RuntimeShader(carthasShader.skSLCode)
+        compiledShaderCache[carthasShader.skSLCode]
+            .orElse {
+                val compiledShader = RuntimeShader(carthasShader.skSLCode)
+                compiledShaderCache[carthasShader.skSLCode] = compiledShader
+                compiledShader
+            }
     }
     val shaderWithStaticUniforms = remember(carthasShader.skSLCode, carthasShader.staticUniforms) {
         runtimeShader.apply {
@@ -53,12 +64,13 @@ private fun RuntimeShader.applyUniform(uniform: Uniform<*>) = when (uniform) {
     is IntUniform -> setIntUniform(uniform.name, uniform.value)
     is FloatUniform -> setFloatUniform(uniform.name, uniform.value)
     is ColorUniform -> setColorUniform(
-        uniform.name, android.graphics.Color.valueOf(
+        uniform.name,
+        android.graphics.Color.valueOf(
             uniform.value.red,
             uniform.value.green,
             uniform.value.blue,
             uniform.value.alpha,
-        )
+        ),
     )
 }
 

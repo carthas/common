@@ -7,10 +7,16 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.RenderEffect
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
+import com.carthas.common.ext.orElse
 import org.jetbrains.skia.ImageFilter
 import org.jetbrains.skia.RuntimeEffect
 import org.jetbrains.skia.RuntimeShaderBuilder
 
+
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+actual typealias CompiledShader = RuntimeEffect
+
+private val compiledShaderCache = mutableMapOf<String, CompiledShader>()
 
 /**
  * Adds a custom SkSL shader to the [Modifier] pipeline.
@@ -22,7 +28,12 @@ import org.jetbrains.skia.RuntimeShaderBuilder
 actual fun Modifier.shader(carthasShader: CarthasShader): Modifier = composed {
     val time by carthasShader.currentTime
     val runtimeEffect = remember(carthasShader.skSLCode) {
-        RuntimeEffect.makeForShader(sksl = carthasShader.skSLCode)
+        compiledShaderCache[carthasShader.skSLCode]
+            .orElse {
+                val compiledShader = RuntimeEffect.makeForShader(sksl = carthasShader.skSLCode)
+                compiledShaderCache[carthasShader.skSLCode] = compiledShader
+                compiledShader
+            }
     }
     val shaderBuilder = remember(carthasShader.skSLCode, carthasShader.staticUniforms) {
         RuntimeShaderBuilder(runtimeEffect).apply {
@@ -55,7 +66,7 @@ private fun RuntimeShaderBuilder.applyUniform(uniform: Uniform<*>) = when (unifo
         uniform.value.red,
         uniform.value.green,
         uniform.value.blue,
-        uniform.value.alpha
+        uniform.value.alpha,
     )
 }
 
