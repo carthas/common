@@ -2,6 +2,8 @@ package com.carthas.common.mvi
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import com.carthas.common.mvi.navigation.LocalNavigator
 import com.carthas.common.mvi.navigation.Navigator
 import org.koin.compose.viewmodel.koinViewModel
@@ -15,7 +17,9 @@ import org.koin.core.parameter.parametersOf
  *
  * Most [Screen]s should be `data object`s.
  */
-abstract class Screen {
+abstract class Screen : ViewModelStoreOwner {
+    override val viewModelStore: ViewModelStore = ViewModelStore()
+
     /**
      * Defines the UI content of a [Screen].
      *
@@ -23,8 +27,8 @@ abstract class Screen {
      * for the corresponding [Screen]. It is invoked by navigation utilities, such as [Navigator.CurrentScreen],
      * to render the content of the active screen in the navigation stack.
      *
-     * If you are using Koin DI, and the [Screen] has a corresponding [CarthasViewModel], you should use the [content]
-     * function for a clean implementation.
+     * If you are using Koin DI, and the [Screen] has a corresponding [CarthasViewModel], you should use the inline [Content]
+     * helper function for a clean implementation.
      */
     @Composable
     abstract fun Content()
@@ -58,9 +62,11 @@ abstract class Screen {
         content: @Composable (state: S, dispatchFunction: (I) -> Unit) -> Unit,
     ) {
         val navigator: Navigator = LocalNavigator.current
-        val viewModel: VM = koinViewModel { parametersOf(navigator, *viewModelParams) }
+        val viewModel: VM = koinViewModel(
+            viewModelStoreOwner = this,
+            parameters = { parametersOf(navigator, *viewModelParams) },
+        )
         val uiState: S by viewModel.collectState()
-
         content(uiState, viewModel::receive)
     }
 }

@@ -87,7 +87,9 @@ interface Navigator {
      */
     fun pop() {
         if (currentStack.isNotEmpty()) {
-            currentStack = currentStack - currentStack.last()
+            val topScreen = currentStack.last()
+            topScreen.viewModelStore.clear()
+            currentStack = currentStack - topScreen
         }
     }
 
