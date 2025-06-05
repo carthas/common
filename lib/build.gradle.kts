@@ -64,14 +64,27 @@ kotlin {
             dependsOn(skiaMain)
         }
 
+        val iosMain by creating {
+            dependsOn(nativeMain)
+        }
+
+        val macMain by creating {
+            dependsOn(nativeMain)
+        }
+
         listOf(
             iosX64Main,
             iosArm64Main,
             iosSimulatorArm64Main,
+        ).forEach {
+            it.get().dependsOn(iosMain)
+        }
+
+        listOf(
             macosX64Main,
             macosArm64Main,
         ).forEach {
-            it.get().dependsOn(nativeMain)
+            it.get().dependsOn(macMain)
         }
     }
 }

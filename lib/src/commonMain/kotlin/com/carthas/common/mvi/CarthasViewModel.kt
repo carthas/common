@@ -4,12 +4,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
+
+expect val ioBoundDispatcher: CoroutineDispatcher
+expect val cpuBoundDispatcher: CoroutineDispatcher
 
 /**
  * Base class for managing UI state ([UIState]) and handling user intents ([UIIntent]) in an MVI architecture.
@@ -80,6 +85,26 @@ abstract class CarthasViewModel<S : UIState, in I : UIIntent>(
      * @param lambda A suspend function block to be executed within the [CoroutineScope] of the ViewModel.
      */
     fun launch(lambda: suspend CoroutineScope.() -> Unit) = viewModelScope.launch(block = lambda)
+
+    /**
+     * Executes IO-bound work within the context of [ioBoundDispatcher].
+     *
+     * @param T The type of the result returned by [lambda].
+     * @param lambda A suspending lambda function representing the IO-bound operation to be executed.
+     * @return The result of the operation defined in [lambda].
+     */
+    suspend inline fun <reified T> CoroutineScope.ioBound(noinline lambda: suspend CoroutineScope.() -> T) =
+        withContext(context = ioBoundDispatcher, block = lambda)
+
+    /**
+     * Executes CPU-bound work within the context of [cpuBoundDispatcher]
+     *
+     * @param T The return type of the operation performed by [lambda].
+     * @param lambda A suspending function block to be executed on the CPU-bound dispatcher.
+     * @return The result of the operation defined in [lambda].
+     */
+    suspend inline fun <reified T> CoroutineScope.cpuBound(noinline lambda: suspend CoroutineScope.() -> T) =
+        withContext(context = cpuBoundDispatcher, block = lambda)
 
     /**
      * Launches a coroutine in [viewModelScope] and returns a [kotlinx.coroutines.Deferred] object that represents
