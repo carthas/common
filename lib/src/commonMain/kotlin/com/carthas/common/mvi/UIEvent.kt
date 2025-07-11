@@ -1,4 +1,4 @@
-package com.carthas.common.mvi.event
+package com.carthas.common.mvi
 
 import androidx.compose.runtime.Immutable
 
@@ -11,7 +11,4 @@ import androidx.compose.runtime.Immutable
  *
  * Screens can override [Screen.onUiEvent] to handle these events.
  */
-interface UIEvent
-
-data class ShowDialog(val message: String) : UIEvent
-object DismissDialog : UIEvent
+interface UIEven

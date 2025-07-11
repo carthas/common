@@ -23,7 +23,7 @@ expect val cpuBoundDispatcher: CoroutineDispatcher
  * @param I Type of the [UIIntent] to be handled.
  * @param initialState Initial state of type [UIState].
  */
-abstract class CarthasViewModel<S : UIState, in I : UIIntent>(
+abstract class CarthasViewModel<S : UIState, in I : UIIntent, in E : UIEvent>(
     initialState: S,
 ) : ViewModel() {
     /**
@@ -49,6 +49,8 @@ abstract class CarthasViewModel<S : UIState, in I : UIIntent>(
      * @param intent The [UIIntent] instance representing an action or event to be processed.
      */
     abstract fun receive(intent: I)
+
+    open fun onUiEvent(event: E) {}
 
     /**
      * Collects the current [UIState] from the internal [stateFlow] and observes updates to it in a composable scope.
