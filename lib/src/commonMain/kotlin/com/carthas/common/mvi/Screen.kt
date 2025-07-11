@@ -33,6 +33,10 @@ abstract class Screen : ViewModelStoreOwner {
     @Composable
     abstract fun Content()
 
+    open fun onUiEvent(event: UIEvent) {
+        // Default no-op
+    }
+
     /**
      * A composable function that binds a [CarthasViewModel] to UI content, providing the current [UIState]
      * and a dispatch function for handling [UIIntent]. The content's dispatch function is the [CarthasViewModel]'s
@@ -74,18 +78,4 @@ abstract class Screen : ViewModelStoreOwner {
         viewModelStoreOwner = this,
         parameters = { parametersOf(*viewModelParams) }
     )
-
-    /**
-     * Optional UI event handler for the screen.
-     *
-     * This can be overridden by specific [Screen] subclasses to respond to UI-level events such as
-     * focus requests, dialog triggers, or transient interactions not owned by the ViewModel.
-     *
-     * By default, does nothing.
-     *
-     * @param event The [UIEvent] being dispatched.
-     */
-    open fun onUiEvent(event: UIEvent) {
-        // Default no-op. Override in subclasses if needed.
-    }
 }

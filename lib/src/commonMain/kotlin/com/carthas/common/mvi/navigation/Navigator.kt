@@ -116,22 +116,6 @@ interface Navigator {
     fun CurrentScreen() {
         currentStack.last().Content()
     }
-
-    /**
-     * Sends a [UIEvent] to the currently active screen.
-     *
-     * This provides a direct channel for triggering UI behavior at the screen level,
-     * such as dialogs, focus requests, or transient animations that are not managed
-     * by the ViewModel.
-     *
-     * Screens must override [Screen.onUiEvent] to respond.
-     *
-     * @param event The UI event to send to the current screen.
-     */
-    fun sendUiEvent(event: UIEvent) {
-        currentStack.lastOrNull()?.onUiEvent(event)
-    }
-
 }
 
 object NoNavigator : Navigator {
