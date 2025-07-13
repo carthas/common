@@ -2,6 +2,7 @@ package com.carthas.common.data
 
 import androidx.compose.runtime.Immutable
 
+
 /**
  * A sealed interface for encapsulating the state of a load operation.
  *
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Immutable
  *
  * @param ResultType The type of the result or data being loaded.
  */
+@Immutable
 sealed interface Load<ResultType>
 
 /**
