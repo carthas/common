@@ -5,8 +5,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
 
-actual val ioBoundDispatcher: CoroutineDispatcher
+@PublishedApi
+internal actual val ioBoundDispatcher: CoroutineDispatcher
     get() = Dispatchers.IO
 
-actual val cpuBoundDispatcher: CoroutineDispatcher
+@PublishedApi
+internal actual val cpuBoundDispatcher: CoroutineDispatcher
     get() = Dispatchers.Default

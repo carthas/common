@@ -59,19 +59,19 @@ abstract class Screen : ViewModelStoreOwner {
     @Composable
     inline fun <reified VM : CarthasViewModel<S, I>, S : UIState, I : UIIntent> Content(
         vararg viewModelParams: Any,
-        content: @Composable (state: S, dispatchFunction: (I) -> Unit) -> Unit,
+        content: @Composable (state: S, emitIntent: (I) -> Unit) -> Unit,
     ) {
         val navigator: Navigator = LocalNavigator.current
         val viewModel: VM = injectVM(navigator, *viewModelParams)
         val uiState: S by viewModel.collectState()
-        content(uiState, viewModel::receive)
+        content(uiState, viewModel::emitIntent)
     }
 
     @Composable
-    inline fun <reified VM : CarthasViewModel<*,*>> injectVM(
+    inline fun <reified VM : CarthasViewModel<*, *>> injectVM(
         vararg viewModelParams: Any,
     ): VM = koinViewModel(
         viewModelStoreOwner = this,
-        parameters = { parametersOf(*viewModelParams) }
+        parameters = { parametersOf(*viewModelParams) },
     )
 }
