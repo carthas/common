@@ -1,13 +1,19 @@
 package com.carthas.common.mvi
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
-import com.carthas.common.mvi.navigation.LocalNavigator
+import androidx.compose.runtime.remember
 import com.carthas.common.mvi.navigation.Navigator
-import org.koin.compose.viewmodel.koinViewModel
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
+import org.koin.core.component.getScopeId
+import org.koin.core.component.getScopeName
 import org.koin.core.parameter.parametersOf
+import org.koin.mp.KoinPlatformTools
+import kotlin.reflect.KClass
 
 
 /**
@@ -17,8 +23,42 @@ import org.koin.core.parameter.parametersOf
  *
  * Most [Screen]s should be `data object`s.
  */
-abstract class Screen : ViewModelStoreOwner {
-    override val viewModelStore: ViewModelStore = ViewModelStore()
+abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
+    initialState: S,
+) {
+    /**
+     * Represents the Koin dependency injection scope associated with this [Screen].
+     *
+     * The [scope] creates a unique DI context for each screen instance. It enables scoped dependencies tied to the
+     * lifecycle of the [Screen].
+     *
+     * The lifetime of the [scope] should be explicitly controlled, where appropriate, by invoking `dispose()`
+     * to release resources and clean up all objects managed by this [scope].
+     */
+    private val scope = KoinPlatformTools
+        .defaultContext()
+        .get()
+        .createScope(
+            scopeId = getScopeId(),
+            qualifier = getScopeName(),
+        )
+
+    /**
+     * A [MutableStateFlow] holding the current UI state of the [Screen].
+     */
+    private val stateFlow = MutableStateFlow(initialState)
+
+    /**
+     * Mutates the current state of the [stateFlow] by applying the given [mutation] function.
+     *
+     * @param mutation A lambda that takes the current state of type [S] and returns the updated state.
+     */
+    internal fun mutateState(mutation: (S) -> S) = stateFlow.update { mutation(it) }
+
+    /**
+     * Cleans up resources and releases the current scope associated with the [Screen].
+     */
+    internal fun dispose() = scope.close()
 
     /**
      * Defines the UI content of a [Screen].
@@ -34,44 +74,53 @@ abstract class Screen : ViewModelStoreOwner {
     abstract fun Content()
 
     /**
-     * A composable function that binds a [CarthasViewModel] to UI content, providing the current [UIState]
-     * and a dispatch function for handling [UIIntent]. The content's dispatch function is the [CarthasViewModel]'s
-     * receive function, which allows the screen to dispatch events or actions to the VM.
+     * Defines a composable function to bind a [CarthasViewModel] to the UI represented by [content].
      *
-     * This function retrieves the ViewModel instance using koin dependency injection and collects its state,
-     * enabling state-driven recomposition.
-     *
-     * *NOTE* you will need to provide a type param for VM at the call site for DI to work properly. e.g.:
-     *
-     * content<MyViewModel, MyState, MyIntent> { state, dispatch ->
-     *     // composables
-     * }
-     *
-     * or
-     *
-     * content<MyViewModel, _, _> { state, dispatch ->
-     *     // composables
-     * }
-     *
-     * @param viewModelParams Parameters passed to the ViewModel instance at dependency resolution time.
-     * @param content A composable function that receives the UI state and dispatch function.
+     * @param VM The type of [CarthasViewModel] managing this UI's state, intents, and events.
+     * @param vmClass The [KClass] of the [CarthasViewModel] used to instantiate or retrieve the appropriate vm instance.
+     * @param viewModelParams Optional parameters required for the instantiation of the vm.
+     * @param content A composable function representing the UI content, which takes the following parameters:
+     * - `state`: The current UI state of type [S] contained within this screen and updated by the VM.
+     * - `emitIntent`: A function to send user intents of type [I] to the ViewModel.
+     * - `collectEvents`: A composable function to observe and handle events of type [E] emitted by the ViewModel.
      */
     @Composable
-    inline fun <reified VM : CarthasViewModel<S, I>, S : UIState, I : UIIntent> Content(
+    fun <VM : CarthasViewModel<S, I, E>> Content(
+        vmClass: KClass<VM>,
         vararg viewModelParams: Any,
-        content: @Composable (state: S, emitIntent: (I) -> Unit) -> Unit,
+        content: @Composable (state: S, emitIntent: (I) -> Unit, collectEvents: @Composable (FlowCollector<E>) -> Unit) -> Unit,
     ) {
-        val navigator: Navigator = LocalNavigator.current
-        val viewModel: VM = injectVM(navigator, *viewModelParams)
-        val uiState: S by viewModel.collectState()
-        content(uiState, viewModel::emitIntent)
+        val uiState: S by stateFlow.collectAsState()
+        // reuse vm instance while same Screen instance
+        val viewModel: VM = remember(this.scope) {
+            this.scope.get<VM>(
+                clazz = vmClass,
+                parameters = {
+                    parametersOf(
+                        this,  // for CarthasViewModel constructor
+                        *viewModelParams,
+                    )
+                },
+            )
+        }
+        // collect events while in composition
+        val collectEvents: @Composable (FlowCollector<E>) -> Unit = {
+            LaunchedEffect(Unit) {
+                viewModel.collectEvents(collector = it)
+            }
+        }
+        content(uiState, viewModel::receiveIntent, collectEvents)
     }
+}
 
+
+/**
+ * A no-op implementation of [Screen] with no state, intent, or event handling.
+ *
+ * This screen serves as a placeholder or no-op screen that does not manage any
+ * specific UI state ([NoState]), user intents ([NoIntent]), or UI events ([NoEvent]).
+ */
+object NoScreen : Screen<NoState, NoIntent, NoEvent>(NoState) {
     @Composable
-    inline fun <reified VM : CarthasViewModel<*, *>> injectVM(
-        vararg viewModelParams: Any,
-    ): VM = koinViewModel(
-        viewModelStoreOwner = this,
-        parameters = { parametersOf(*viewModelParams) },
-    )
+    override fun Content() { }
 }

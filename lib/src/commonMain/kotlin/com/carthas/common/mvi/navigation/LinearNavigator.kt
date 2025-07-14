@@ -14,20 +14,20 @@ import com.carthas.common.mvi.Screen
  * instance is created. This screen will be the first and active screen by default.
  */
 class LinearNavigator(
-    initialScreen: Screen,
+    initialScreen: Screen<*,*,*>,
 ) : Navigator {
     /**
      * Represents the current navigation stack for the active navigation context, managed as a state
      * within the [LinearNavigator]. The stack maintains an ordered list of [Screen] objects,
      * where the last element represents the top of the stack and the screen currently displayed to the user.
      */
-    private var navigationStack: List<Screen> by mutableStateOf(
+    private var navigationStack: List<Screen<*,*,*>> by mutableStateOf(
         listOf(initialScreen),
     )
     /**
      * An implementation that links [navigationStack] directly to [Navigator]'s [currentStack].
      */
-    override var currentStack: List<Screen>
+    override var currentStack: List<Screen<*,*,*>>
         get() = navigationStack
         set(value) { navigationStack = value }
 }

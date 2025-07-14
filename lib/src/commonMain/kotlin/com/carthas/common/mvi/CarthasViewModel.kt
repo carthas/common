@@ -1,53 +1,59 @@
 package com.carthas.common.mvi
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.carthas.common.ext.casted
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-@PublishedApi
 internal expect val ioBoundDispatcher: CoroutineDispatcher
 
-@PublishedApi
 internal expect val cpuBoundDispatcher: CoroutineDispatcher
 
+private typealias StateMutation<S> = ((S) -> S) -> Unit
+
 /**
- * Base class for managing UI state ([UIState]) and handling user intents ([UIIntent]) in an MVI architecture.
+ * An abstract base class for implementing a ViewModel in a Compose Multiplatform application's MVI architecture.
  *
- * @param S Type of the [UIState] to be managed.
- * @param I Type of the [UIIntent] to be handled.
- * @param initialState Initial state of type [UIState].
+ * [CarthasViewModel] manages interactions between the UI layer and the business logic, updating state ([UIState]),
+ * receiving and reacting to intents ([UIIntent]), and sending one-off events ([UIEvent]) to the UI.
+ *
+ * This class leverages [viewModelScope] for coroutine management and includes dsl functions for IO-bound
+ * or CPU-bound task execution.
+ *
+ * @param S Represents the type of UI state ([UIState]) associated with the ViewModel.
+ * @param I Represents the type of UI intents ([UIIntent]) that can be received from the user interface.
+ * @param E Represents the type of UI events ([UIEvent]) that can be emitted to the user interface.
+ * @param screen The [Screen] instance associated with this ViewModel, which exposes a state mutation function.
+ * @param mutationFunction A lambda to mutate and update the current state.
  */
-abstract class CarthasViewModel<S : UIState, I : UIIntent>(
-    initialState: S,
+abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
+    screen: Screen<S, I, E>,
+    private val mutationFunction: StateMutation<S> = screen::mutateState,
 ) : ViewModel() {
 
     /**
-     * A [MutableStateFlow] holding the current UI state of the [Screen] this VM manages.
-     *
-     * Used to manage and propagate state updates efficiently across components, ensuring
-     * reactive state management in a Compose Multiplatform context.
-     */
-    private val stateFlow = MutableStateFlow(initialState)
-
-    /**
-     * A [MutableSharedFlow] used to receive a stream of [UIIntent] objects within the [CarthasViewModel].
+     * A [MutableSharedFlow] used to receive [UIIntent] objects sent from the UI.
      */
     private val intentFlow = MutableSharedFlow<I>()
 
+    /**
+     * A [MutableSharedFlow] used to send [UIEvent] objects to the UI.
+     */
+    private val eventFlow = MutableSharedFlow<E>()
+
     init {
         // collect intents while this instance is alive
-        viewModelScope.launch {
-            intentFlow.collect { receive(intent = it) }
+        launch {
+            intentFlow.collect {
+                receive(intent = it)
+            }
         }
     }
 
@@ -59,45 +65,29 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent>(
     abstract suspend fun receive(intent: I)
 
     /**
-     * Internally emits the given intent to [intentFlow]. Automatically handles the boilerplate of launching a coroutine
+     * Internally received the given [intent] to [intentFlow]. Automatically handles the boilerplate of launching a coroutine
      * on the main thread within the [viewModelScope].
      */
-    @PublishedApi
-    internal fun emitIntent(intent: I) = launch { intentFlow.emit(intent) }
+    internal fun receiveIntent(intent: I) = launch { intentFlow.emit(intent) }
 
     /**
-     * Collects the current [UIState] from the internal [stateFlow] and observes updates to it in a composable scope.
-     *
-     * @return A [State] object of type [S], representing the current UI state.
+     * Allows implementations to emit event to [eventFlow]. Automatically handles the boilerplate of launching a coroutine
+     * on the main thread within the [viewModelScope].
      */
-    @PublishedApi
-    @Composable
-    internal fun collectState() = stateFlow.collectAsState()
+    protected fun emitEvent(event: E) = launch { eventFlow.emit(event) }
 
     /**
-     * Casts the current state stored in [stateFlow] to the specified subtype [SubState].
-     *
-     * @return The current state casted to [SubState].
-     * @throws ClassCastException if the cast is invalid.
+     * Collects [UIEvent] objects from [eventFlow].
      */
-    @Suppress("UNCHECKED_CAST")
-    private fun <SubState : S> getCastedState(): SubState = stateFlow.value as SubState
+    internal suspend fun collectEvents(collector: FlowCollector<E>): Nothing = eventFlow.collect(collector)
 
     /**
-     * Acquires the current state as [SubState] type and uses it, returning the result of [lambda].
-     *
-     * @param lambda A function that receives the state ([SubState]) and returns some value of type [R].
-     * @return The result of applying [lambda] to the current state.
-     */
-    fun <SubState : S, R> useState(lambda: (SubState) -> R): R = lambda(getCastedState())
-
-    /**
-     * Updates the state of the [stateFlow] using a mutation function applied to the current state.
+     * Updates the state of the ui state using a mutation function applied to the current state.
      *
      * @param SubState A subtype of the current UI state [S].
      * @param mutation A function that takes the current state of type [SubState] and returns a new state of type [S].
      */
-    fun <SubState : S> mutateState(mutation: (SubState) -> S) = stateFlow.update { mutation(getCastedState()) }
+    fun <SubState : S> mutateState(mutation: (SubState) -> S) = mutationFunction { mutation(it.casted()) }
 
     /**
      * Executes IO-bound work within the context of [ioBoundDispatcher], in this [viewModelScope].
@@ -106,7 +96,7 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent>(
      * @param lambda A suspending lambda function representing the IO-bound operation to be executed.
      * @return The result of the operation defined in [lambda].
      */
-    suspend inline fun <reified T> ioBound(noinline lambda: suspend CoroutineScope.() -> T): T =
+    suspend fun <T> ioBound(lambda: suspend CoroutineScope.() -> T): T =
         withContext(context = ioBoundDispatcher) { viewModelScope.lambda() }
 
     /**
@@ -116,7 +106,7 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent>(
      * @param lambda A suspending function block to be executed on the CPU-bound dispatcher.
      * @return The result of the operation defined in [lambda].
      */
-    suspend inline fun <reified T> cpuBound(noinline lambda: suspend CoroutineScope.() -> T) =
+    suspend fun <T> cpuBound(lambda: suspend CoroutineScope.() -> T) =
         withContext(context = cpuBoundDispatcher) { viewModelScope.lambda() }
 
     /**
@@ -142,6 +132,6 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent>(
  * This object is used as a placeholder ViewModel when no specific state or intent handling is required.
  * It always returns [Unit] for any intent received.
  */
-object NoViewModel : CarthasViewModel<NoState, NoIntent>(NoState) {
+object NoViewModel : CarthasViewModel<NoState, NoIntent, NoEvent>(NoScreen) {
     override suspend fun receive(intent: NoIntent) = Unit
 }

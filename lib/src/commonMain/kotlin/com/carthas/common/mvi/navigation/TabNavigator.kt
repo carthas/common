@@ -17,7 +17,7 @@ import kotlin.collections.plus
  */
 class TabNavigator(
     initialTab: Tab,
-    initialNavStacks: Map<Tab, List<Screen>>,
+    initialNavStacks: Map<Tab, List<Screen<*,*,*>>>,
 ) : Navigator {
     /**
      * Represents the currently active tab in the tab-based navigation system.
@@ -39,7 +39,7 @@ class TabNavigator(
      * Connects the currently active tab's navigation stack to the [Navigator] interface's [currentStack], so that
      * [Navigator] operations affect the [currentTab]'s navigation stack.
      */
-    override var currentStack: List<Screen>
+    override var currentStack: List<Screen<*,*,*>>
         get() = navigationStacks[currentTab]!!
         set(value) {
             navigationStacks = navigationStacks + (currentTab to value)
