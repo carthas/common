@@ -14,6 +14,14 @@ plugins {
 }
 
 kotlin {
+    targets.all {
+        compilations.all {
+            compileTaskProvider.get().compilerOptions {
+                freeCompilerArgs.add("-Xnested-type-aliases")
+            }
+        }
+    }
+
     jvmToolchain(21)
     metadata()
 
