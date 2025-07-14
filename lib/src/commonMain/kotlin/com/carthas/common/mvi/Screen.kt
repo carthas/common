@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import com.carthas.common.mvi.navigation.LocalNavigator
 import com.carthas.common.mvi.navigation.Navigator
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -90,6 +91,7 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
         vararg viewModelParams: Any,
         content: @Composable (state: S, emitIntent: (I) -> Unit, collectEvents: @Composable (FlowCollector<E>) -> Unit) -> Unit,
     ) {
+        val navigator = LocalNavigator.current
         val uiState: S by stateFlow.collectAsState()
         // reuse vm instance while same Screen instance
         val viewModel: VM = remember(this.scope) {
@@ -98,6 +100,7 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
                 parameters = {
                     parametersOf(
                         this,  // for CarthasViewModel constructor
+                        navigator,
                         *viewModelParams,
                     )
                 },
