@@ -36,13 +36,15 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
      * The lifetime of the [scope] should be explicitly controlled, where appropriate, by invoking `dispose()`
      * to release resources and clean up all objects managed by this [scope].
      */
-    private val scope = KoinPlatformTools
-        .defaultContext()
-        .get()
-        .createScope(
-            scopeId = getScopeId(),
-            qualifier = getScopeName(),
-        )
+    private val scope by lazy {
+        KoinPlatformTools
+            .defaultContext()
+            .get()
+            .createScope(
+                scopeId = getScopeId(),
+                qualifier = getScopeName(),
+            )
+    }
 
     /**
      * A [MutableStateFlow] holding the current UI state of the [Screen].
