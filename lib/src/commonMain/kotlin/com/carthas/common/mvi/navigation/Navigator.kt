@@ -45,14 +45,14 @@ interface Navigator {
      * such as linear navigation or navigation across tabs. The stack updates are handled reactively,
      * supporting Compose's recomposition mechanism to reflect changes promptly.
      */
-    var currentStack: List<Screen<*,*,*>>
+    var currentStack: List<Screen<*, *, *>>
 
     /**
      * Adds the specified [Screen] to the end of the current navigation stack, making it the active screen.
      *
      * @param screen The [Screen] to be added to the current navigation stack.
      */
-    infix fun push(screen: Screen<*,*,*>) {
+    infix fun push(screen: Screen<*, *, *>) {
         currentStack = currentStack + screen
     }
 
@@ -62,7 +62,7 @@ interface Navigator {
      * @param screen The [Screen] instance to be placed on top of the navigation stack,
      * effectively replacing the current top screen.
      */
-    infix fun replace(screen: Screen<*,*,*>) {
+    infix fun replace(screen: Screen<*, *, *>) {
         pop()
         push(screen)
     }
@@ -74,7 +74,7 @@ interface Navigator {
      * @param screen The screen to replace the current navigation stack with. This screen becomes
      * the only screen in the stack.
      */
-    infix fun replaceAll(screen: Screen<*,*,*>) {
+    infix fun replaceAll(screen: Screen<*, *, *>) {
         currentStack = listOf(screen)
     }
 
@@ -99,7 +99,7 @@ interface Navigator {
      * @param predicate A function that takes a [Screen] and returns a [Boolean]. If the predicate returns true
      * for the topmost screen in the stack, the popping stops. Otherwise, the screen is removed, and the evaluation continues.
      */
-    infix fun popUntil(predicate: (Screen<*,*,*>) -> Boolean) {
+    infix fun popUntil(predicate: (Screen<*, *, *>) -> Boolean) {
         while (currentStack.isNotEmpty() && !predicate(currentStack.last())) {
             pop()
         }
@@ -119,7 +119,7 @@ interface Navigator {
 }
 
 object NoNavigator : Navigator {
-    override var currentStack: List<Screen<*,*,*>>
+    override var currentStack: List<Screen<*, *, *>>
         get() = throw IllegalStateException("No Navigator is provided.")
         set(_) = throw IllegalStateException("No Navigator is provided.")
 }
