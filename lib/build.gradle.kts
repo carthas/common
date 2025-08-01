@@ -49,6 +49,9 @@ kotlin {
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose.viewmodel)
+
+                // kotlinx
+                implementation(libs.kotlinx.datetime)
             }
         }
 
