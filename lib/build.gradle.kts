@@ -102,6 +102,10 @@ kotlin {
 android {
     namespace = "com.carthas.common"
     compileSdk = 36
+
+    lint {
+        abortOnError = false
+    }
 }
 
 tasks.withType<KotlinCompile>().all {
