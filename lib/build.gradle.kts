@@ -18,6 +18,7 @@ kotlin {
         compilations.all {
             compileTaskProvider.get().compilerOptions {
                 freeCompilerArgs.add("-Xnested-type-aliases")
+                freeCompilerArgs.add("-Xcontext-sensitive-resolution")
             }
         }
     }
