@@ -65,7 +65,7 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
     abstract suspend fun receive(intent: I)
 
     /**
-     * Internally received the given [intent] to [intentFlow]. Automatically handles the boilerplate of launching a coroutine
+     * Internally receives the given [intent] to [intentFlow]. Automatically handles the boilerplate of launching a coroutine
      * on the main thread within the [viewModelScope].
      */
     internal fun receiveIntent(intent: I) = launch { intentFlow.emit(intent) }

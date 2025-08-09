@@ -3,6 +3,7 @@ package com.carthas.common.mvi.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.carthas.common.mvi.Disposable
 import com.carthas.common.mvi.Screen
 
 
@@ -88,7 +89,7 @@ interface Navigator {
     fun pop() {
         if (currentStack.isNotEmpty()) {
             val topScreen = currentStack.last()
-            topScreen.dispose()
+            if (topScreen is Disposable) topScreen.dispose()
             currentStack = currentStack - topScreen
         }
     }

@@ -59,7 +59,7 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
     internal fun mutateState(mutation: (S) -> S) = stateFlow.update { mutation(it) }
 
     /**
-     * Cleans up resources and releases the current scope associated with the [Screen].
+     * Releases the current scope associated with the [Screen]. Only called if the implementing class also implements [Disposable].
      */
     internal fun dispose() = scope.close()
 
