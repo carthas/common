@@ -20,6 +20,7 @@ kotlin {
                 freeCompilerArgs.add("-Xnested-type-aliases")
                 freeCompilerArgs.add("-Xcontext-sensitive-resolution")
                 freeCompilerArgs.add("-Xexpect-actual-classes")
+                freeCompilerArgs.add("-Xcontext-parameters")
             }
         }
     }

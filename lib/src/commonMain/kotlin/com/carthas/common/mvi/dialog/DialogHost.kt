@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.zIndex
-import com.carthas.common.ext.runIf
+import com.carthas.common.ext.modifyIf
 
 
 /**
@@ -75,7 +75,7 @@ fun DialogHost(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.Black.copy(alpha = 0.3f))
-                            .runIf(isTop && dialog.dismissOnClickOutside) {
+                            .modifyIf(isTop && dialog.dismissOnClickOutside) {
                                 pointerInput(Unit) { detectTapGestures { dialogManager.dismiss() } }
                             },
                     )

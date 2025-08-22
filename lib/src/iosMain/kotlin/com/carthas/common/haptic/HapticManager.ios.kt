@@ -91,8 +91,6 @@ class IOSHapticManager : HapticManager {
             time = 0.0,
             error = null,
         )
-
-        delay(duration)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
