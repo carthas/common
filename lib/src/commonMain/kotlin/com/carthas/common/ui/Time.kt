@@ -28,14 +28,21 @@ open class AnimationTimeProducer(refreshRate: Hz) {
      * @property timeFlow A periodic flow of elapsed time in seconds, calculated based on the given refresh rate.
      */
     private val timeFlow: Flow<Float> = flow {
-        val startTime = TimeSource.Monotonic.markNow()
         val refreshDelaySecs = 1f / refreshRate.value
         val refreshDelayMillis = (1_000 * refreshDelaySecs).toLong()
+        var lastMark = TimeSource.Monotonic.markNow()
+        var animationTime = 0f
 
         while (true) {
             delay(refreshDelayMillis)
-            val elapsedSeconds = startTime.elapsedNow().inWholeMilliseconds / 1_000f
-            emit(elapsedSeconds)
+            val now = TimeSource.Monotonic.markNow()
+            val delta = lastMark.elapsedNow().inWholeMilliseconds / 1_000f
+            lastMark = now
+
+            // update only if time gap is < 500ms
+            if (delta < 0.5f) animationTime += delta
+
+            emit(animationTime)
         }
     }
 
