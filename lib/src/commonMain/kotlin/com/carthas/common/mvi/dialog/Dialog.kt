@@ -31,9 +31,9 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalUuidApi::class)
 data class Dialog(
     val key: String = Uuid.random().toString(),
-    val enterTransition: EnterTransition,
-    val exitTransition: ExitTransition,
-    val dismissDelay: Duration,
+    val enterTransition: EnterTransition = EnterTransition.None,
+    val exitTransition: ExitTransition = ExitTransition.None,
+    val dismissDelay: Duration = Duration.ZERO,
     val dismissOnClickOutside: Boolean = true,
     val content: @Composable () -> Unit,
 )
