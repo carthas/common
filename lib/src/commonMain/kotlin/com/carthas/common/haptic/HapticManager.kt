@@ -7,6 +7,7 @@ import kotlin.time.Duration
 val LocalHapticManager = staticCompositionLocalOf<HapticManager> { error("No HapticManager provided") }
 
 interface HapticManager {
+
     suspend fun vibrate(
         duration: Duration = Duration.ZERO,
         intensity: Float,

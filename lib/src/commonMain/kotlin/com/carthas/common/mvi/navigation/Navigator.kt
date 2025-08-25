@@ -110,7 +110,7 @@ interface Navigator {
      * An entrypoint Composable function that renders the content of the currently displayed screen.
      *
      * The current screen is determined as the screen at the top of the [currentStack] maintained by the [Navigator].
-     * This method invokes the [Screen.Content] function of the current screen to display its user interface.
+     * This method invokes the [Screen.CarthasContent] function of the current screen to display its user interface.
      * It ensures that screen composition dynamically reflects the navigation state managed by the [Navigator].
      */
     @Composable

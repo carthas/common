@@ -5,11 +5,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import com.carthas.common.mvi.navigation.LocalNavigator
 import com.carthas.common.mvi.navigation.Navigator
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.koin.core.component.getScopeId
 import org.koin.core.component.getScopeName
 import org.koin.core.parameter.parametersOf
@@ -20,7 +22,7 @@ import kotlin.reflect.KClass
 /**
  * Abstract base class representing a screen in a Compose Multiplatform application's navigation system.
  *
- * Extend this class to define custom screens by implementing the [Content] function to specify the screen's UI.
+ * Extend this class to define custom screens by implementing the [CarthasContent] function to specify the screen's UI.
  *
  * Most [Screen]s should be `data object`s.
  */
@@ -88,7 +90,7 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
      * - `collectEvents`: A composable function to observe and handle events of type [E] emitted by the ViewModel.
      */
     @Composable
-    fun <VM : CarthasViewModel<S, I, E>> Content(
+    fun <VM : CarthasViewModel<S, I, E>> CarthasContent(
         vmClass: KClass<VM>,
         vararg viewModelParams: Any,
         content: @Composable (state: S, emitIntent: (I) -> Unit, collectEvents: @Composable (FlowCollector<E>) -> Unit) -> Unit,
@@ -109,9 +111,13 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
             )
         }
         // collect events while in composition
-        val collectEvents: @Composable (FlowCollector<E>) -> Unit = {
+        val collectEvents: @Composable (FlowCollector<E>) -> Unit = { outerCollector ->
+            val coroutineScope = rememberCoroutineScope()
+            // launch a coroutine for each event emitted so that delays don't block
+            val innerCollector: FlowCollector<E> = FlowCollector { coroutineScope.launch { outerCollector.emit(it) } }
+
             LaunchedEffect(Unit) {
-                viewModel.collectEvents(collector = it)
+                viewModel.collectEvents(collector = innerCollector)
             }
         }
         content(uiState, viewModel::receiveIntent, collectEvents)
