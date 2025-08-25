@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.staticCompositionLocalOf
 import com.carthas.common.mvi.ioBoundDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -37,7 +38,7 @@ class DialogManager internal constructor() : CoroutineScope {
     /**
      * The [CoroutineContext] used to delay when dismissing animated dialogs.
      */
-    override val coroutineContext: CoroutineContext = ioBoundDispatcher
+    override val coroutineContext: CoroutineContext = Dispatchers.Main
 
     /**
      * A private stack as a [androidx.compose.runtime.snapshots.SnapshotStateList] that holds the active [Dialog]
@@ -64,13 +65,13 @@ class DialogManager internal constructor() : CoroutineScope {
     }
 
     /**
-     * Dismisses the topmost dialog in the dialog stack.
+     * Dismisses the dialog with the matching key, or the topmost dialog in the dialog stack if no key is provided.
      */
-    fun dismiss() {
+    fun dismiss(key: String = _dialogStack.last().key) {
         if (_dialogStack.isNotEmpty()) launch {
-            _dismissEventFlow.emit(DismissEvent(_dialogStack.last().key))
+            _dismissEventFlow.emit(DismissEvent(dialogKey = key))
             delay(_dialogStack.last().dismissDelay)
-            _dialogStack.removeLast()
+            _dialogStack.removeAll { it.key == key }
         }
     }
 
