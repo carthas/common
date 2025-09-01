@@ -5,6 +5,7 @@ compose-multiplatform = "1.8.2"
 koin = "4.1.0"
 kotlin = "2.2.0"
 kotlinx-datetime = "0.7.1"
+lifecycle-viewmodel-compose = "2.9.2"
 maven-publish = "0.33.0"
 
 [libraries]
@@ -12,8 +13,8 @@ arrow-bom = { module = "io.arrow-kt:arrow-stack", version.ref = "arrow" }
 arrow-core = { module = "io.arrow-kt:arrow-core" }
 koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core" }
-koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle-viewmodel-compose" }
 
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

@@ -49,7 +49,10 @@ kotlin {
                 implementation(libs.arrow.core)
 
                 // compose
+                implementation(compose.foundation)
                 implementation(compose.runtime)
+                implementation(compose.ui)
+                implementation(libs.lifecycle.viewmodel.compose)
 
                 // koin
                 implementation(project.dependencies.platform(libs.koin.bom))
