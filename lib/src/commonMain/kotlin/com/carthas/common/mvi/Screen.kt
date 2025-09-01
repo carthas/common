@@ -10,7 +10,6 @@ import com.carthas.common.mvi.navigation.LocalNavigator
 import com.carthas.common.mvi.navigation.Navigator
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.koin.core.component.getScopeId
 import org.koin.core.component.getScopeName
@@ -51,14 +50,7 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
     /**
      * A [MutableStateFlow] holding the current UI state of the [Screen].
      */
-    private val stateFlow = MutableStateFlow(initialState)
-
-    /**
-     * Mutates the current state of the [stateFlow] by applying the given [mutation] function.
-     *
-     * @param mutation A lambda that takes the current state of type [S] and returns the updated state.
-     */
-    internal fun mutateState(mutation: (S) -> S) = stateFlow.update { mutation(it) }
+    internal val stateFlow = MutableStateFlow(initialState)
 
     /**
      * Releases the current scope associated with the [Screen]. Only called if the implementing class also implements [Disposable].
