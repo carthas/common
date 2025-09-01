@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
 import kotlin.coroutines.CoroutineContext
 
 
@@ -29,7 +30,7 @@ import kotlin.coroutines.CoroutineContext
 abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
     screen: Screen<S, I, E>,
     private val screenStateFlow: MutableStateFlow<S> = screen.stateFlow,
-) : ViewModel(), CoroutineScope {
+) : ViewModel(), CoroutineScope, KoinComponent {
 
     override val coroutineContext: CoroutineContext
         get() = viewModelScope.coroutineContext
