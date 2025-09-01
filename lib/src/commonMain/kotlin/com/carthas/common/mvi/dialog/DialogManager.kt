@@ -2,7 +2,6 @@ package com.carthas.common.mvi.dialog
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.carthas.common.mvi.ioBoundDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
