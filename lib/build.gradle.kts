@@ -122,7 +122,7 @@ tasks.withType<KotlinCompile>().all {
 
 group = "com.carthas"
 val artifactId = "common"
-version = "0.6.2"
+version = "0.7.0"
 
 mavenPublishing {
     publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
