@@ -6,8 +6,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.withContext
 
 
+/**
+ * A platform-specific [CoroutineDispatcher] optimized for IO-bound operations such as file handling or network requests.
+ */
 internal expect val ioBoundDispatcher: CoroutineDispatcher
 
+/**
+ * A [CoroutineDispatcher] optimized for executing CPU-bound tasks such as computations or data processing.
+ */
 internal expect val cpuBoundDispatcher: CoroutineDispatcher
 
 /**

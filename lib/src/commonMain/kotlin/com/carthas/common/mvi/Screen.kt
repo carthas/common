@@ -63,7 +63,8 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
     internal val stateFlow = MutableStateFlow(initialState)
 
     /**
-     * Releases the current scope associated with the [Screen]. Only called if the implementing class also implements [Disposable].
+     * Releases the current scope associated with the [Screen]. Only called if the implementing screen class is a
+     * [DisposableScreen].
      */
     internal fun dispose() = scope.close()
 

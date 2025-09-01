@@ -76,6 +76,10 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
      */
     fun <SubState : S> mutateState(mutation: (SubState) -> S) = screenStateFlow.update { mutation(it.casted()) }
 
+
+    /**
+     * Cleans up underlying [ViewModel] resources such as coroutines and closeables.
+     */
     internal fun close() = onCleared()
 }
 

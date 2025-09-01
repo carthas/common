@@ -7,10 +7,20 @@ import org.koin.dsl.ScopeDSL
 import org.koin.dsl.bind
 
 
+/**
+ * Registers a [CarthasViewModel] instance within a scoped DI container. It registers the instance with its runtime type
+ * as the primary type and [CarthasViewModel] as the secondary type.
+ *
+ * @param VM The type of the [CarthasViewModel] to be registered.
+ * @param definition A lambda function that defines how to create the [CarthasViewModel] instance.
+ */
 inline fun <reified VM : CarthasViewModel<*, *, *>> ScopeDSL.scopedViewModel(
     noinline definition: Definition<VM>,
 ) = scoped(definition = definition) bind CarthasViewModel::class
 
+/**
+ * Constructor reference versions of [ScopeDSL.scopedViewModel].
+ */
 inline fun <reified VM : CarthasViewModel<*, *, *>> ScopeDSL.scopedViewModelOf(
     crossinline constructor: () -> VM,
 ) = scopedOf(constructor) bind CarthasViewModel::class
