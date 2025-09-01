@@ -1,12 +1,11 @@
-package com.carthas.common.mvi
+package com.carthas.common.ext
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 
 
 internal actual val ioBoundDispatcher: CoroutineDispatcher
-    get() = Dispatchers.IO
+    get() = Dispatchers.Default
 
-internal actual val cpuBoundDispatcher: kotlinx.coroutines.CoroutineDispatcher
+internal actual val cpuBoundDispatcher: CoroutineDispatcher
     get() = Dispatchers.Default

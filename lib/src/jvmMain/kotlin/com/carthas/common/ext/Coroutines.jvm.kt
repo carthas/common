@@ -1,4 +1,4 @@
-package com.carthas.common.mvi
+package com.carthas.common.ext
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers

@@ -3,18 +3,11 @@ package com.carthas.common.mvi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.carthas.common.ext.casted
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlin.coroutines.CoroutineContext
 
-
-internal expect val ioBoundDispatcher: CoroutineDispatcher
-
-internal expect val cpuBoundDispatcher: CoroutineDispatcher
 
 private typealias StateMutation<S> = ((S) -> S) -> Unit
 
@@ -36,17 +29,20 @@ private typealias StateMutation<S> = ((S) -> S) -> Unit
 abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
     screen: Screen<S, I, E>,
     private val mutationFunction: StateMutation<S> = screen::mutateState,
-) : ViewModel() {
+) : ViewModel(), CoroutineScope {
+
+    override val coroutineContext: CoroutineContext
+        get() = viewModelScope.coroutineContext
 
     /**
      * A [MutableSharedFlow] used to receive [UIIntent] objects sent from the UI.
      */
-    private val intentFlow = MutableSharedFlow<I>()
+    internal val intentFlow = MutableSharedFlow<I>()
 
     /**
      * A [MutableSharedFlow] used to send [UIEvent] objects to the UI.
      */
-    private val eventFlow = MutableSharedFlow<E>()
+    internal val eventFlow = MutableSharedFlow<E>()
 
     init {
         // collect intents while this instance is alive
@@ -65,65 +61,12 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
     abstract suspend fun receive(intent: I)
 
     /**
-     * Internally receives the given [intent] to [intentFlow]. Automatically handles the boilerplate of launching a coroutine
-     * on the main thread within the [viewModelScope].
-     */
-    internal fun receiveIntent(intent: I) = launch { intentFlow.emit(intent) }
-
-    /**
-     * Allows implementations to emit event to [eventFlow]. Automatically handles the boilerplate of launching a coroutine
-     * on the main thread within the [viewModelScope].
-     */
-    protected fun emitEvent(event: E) = launch { eventFlow.emit(event) }
-
-    /**
-     * Collects [UIEvent] objects from [eventFlow].
-     */
-    internal suspend fun collectEvents(collector: FlowCollector<E>): Nothing = eventFlow.collect(collector)
-
-    /**
      * Updates the state of the ui state using a mutation function applied to the current state.
      *
      * @param SubState A subtype of the current UI state [S].
      * @param mutation A function that takes the current state of type [SubState] and returns a new state of type [S].
      */
     fun <SubState : S> mutateState(mutation: (SubState) -> S) = mutationFunction { mutation(it.casted()) }
-
-    /**
-     * Executes IO-bound work within the context of [ioBoundDispatcher], in this [viewModelScope].
-     *
-     * @param T The type of the result returned by [lambda].
-     * @param lambda A suspending lambda function representing the IO-bound operation to be executed.
-     * @return The result of the operation defined in [lambda].
-     */
-    suspend fun <T> ioBound(lambda: suspend CoroutineScope.() -> T): T =
-        withContext(context = ioBoundDispatcher) { viewModelScope.lambda() }
-
-    /**
-     * Executes CPU-bound work within the context of [cpuBoundDispatcher], in this [viewModelScope].
-     *
-     * @param T The return type of the operation performed by [lambda].
-     * @param lambda A suspending function block to be executed on the CPU-bound dispatcher.
-     * @return The result of the operation defined in [lambda].
-     */
-    suspend fun <T> cpuBound(lambda: suspend CoroutineScope.() -> T) =
-        withContext(context = cpuBoundDispatcher) { viewModelScope.lambda() }
-
-    /**
-     * Launches a coroutine on the main thread, in the [viewModelScope] associated with this ViewModel.
-     *
-     * @param lambda A suspend function block to be executed within the [CoroutineScope] of the ViewModel.
-     */
-    fun launch(lambda: suspend CoroutineScope.() -> Unit) = viewModelScope.launch(block = lambda)
-
-    /**
-     * Launches a coroutine on the main thread, in the [viewModelScope] and returns a [kotlinx.coroutines.Deferred]
-     * object that represents a future result of the operation.
-     *
-     * @param lambda A suspending lambda that defines the operation to be performed asynchronously.
-     * @return A [kotlinx.coroutines.Deferred] object that can be used to retrieve the result of the executed task.
-     */
-    fun <T> async(lambda: suspend CoroutineScope.() -> T) = viewModelScope.async(block = lambda)
 }
 
 /**

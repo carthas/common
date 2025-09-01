@@ -97,6 +97,7 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
     ) {
         val navigator = LocalNavigator.current
         val uiState: S by stateFlow.collectAsState()
+
         // reuse vm instance while same Screen instance
         val viewModel: VM = remember(this.scope) {
             this.scope.get<VM>(
@@ -110,17 +111,28 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
                 },
             )
         }
-        // collect events while in composition
-        val collectEvents: @Composable (FlowCollector<E>) -> Unit = { outerCollector ->
-            val coroutineScope = rememberCoroutineScope()
-            // launch a coroutine for each event emitted so that delays don't block
-            val innerCollector: FlowCollector<E> = FlowCollector { coroutineScope.launch { outerCollector.emit(it) } }
 
-            LaunchedEffect(Unit) {
-                viewModel.collectEvents(collector = innerCollector)
+        val coroutineScope = rememberCoroutineScope()
+
+        val emitIntent: (I) -> Unit = remember(viewModel, coroutineScope) {
+            { intent ->
+                coroutineScope.launch { viewModel.intentFlow.emit(intent) }
             }
         }
-        content(uiState, viewModel::receiveIntent, collectEvents)
+
+        // when called, collect events while in composition
+        val collectEvents: @Composable (FlowCollector<E>) -> Unit = remember(viewModel, coroutineScope) {
+            { outerCollector ->
+                LaunchedEffect(Unit) {
+                    viewModel.eventFlow.collect { event ->
+                        // launch a coroutine for each event emitted so that delays don't block
+                        coroutineScope.launch { outerCollector.emit(event) }
+                    }
+                }
+            }
+        }
+
+        content(uiState, emitIntent, collectEvents)
     }
 }
 
