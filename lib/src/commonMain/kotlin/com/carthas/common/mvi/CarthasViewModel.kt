@@ -67,6 +67,8 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
      * @param mutation A function that takes the current state of type [SubState] and returns a new state of type [S].
      */
     fun <SubState : S> mutateState(mutation: (SubState) -> S) = screenStateFlow.update { mutation(it.casted()) }
+
+    internal fun close() = onCleared()
 }
 
 /**

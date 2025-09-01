@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import com.carthas.common.mvi.Screen.Helpers.registerCallback
 import com.carthas.common.mvi.navigation.LocalNavigator
 import com.carthas.common.mvi.navigation.Navigator
 import kotlinx.coroutines.flow.FlowCollector
@@ -14,6 +15,8 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.getScopeId
 import org.koin.core.component.getScopeName
 import org.koin.core.parameter.parametersOf
+import org.koin.core.scope.Scope
+import org.koin.core.scope.ScopeCallback
 import org.koin.mp.KoinPlatformTools
 import kotlin.reflect.KClass
 
@@ -45,6 +48,13 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
                 scopeId = getScopeId(),
                 qualifier = getScopeName(),
             )
+            .apply {
+                registerCallback {
+                    // close all CarthasViewModel instances in the scope when the scope is closed
+                    getAll<CarthasViewModel<*, *, *>>()
+                        .forEach { it.close() }
+                }
+            }
     }
 
     /**
@@ -125,6 +135,15 @@ abstract class Screen<S : UIState, I : UIIntent, E : UIEvent>(
         }
 
         content(uiState, emitIntent, collectEvents)
+    }
+
+    private object Helpers {
+
+        inline fun Scope.registerCallback(crossinline callback: () -> Unit) = this.registerCallback(
+            object : ScopeCallback {
+                override fun onScopeClose(scope: Scope) = callback()
+            },
+        )
     }
 }
 
