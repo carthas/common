@@ -31,15 +31,6 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
     private val screenStateFlow: MutableStateFlow<S> = screen.stateFlow,
 ) : ViewModel(), CoroutineScope {
 
-    init {
-        // collect intents while this instance is alive
-        launch {
-            intentFlow.collect {
-                receive(intent = it)
-            }
-        }
-    }
-
     override val coroutineContext: CoroutineContext
         get() = viewModelScope.coroutineContext
 
@@ -53,12 +44,29 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
      */
     internal val eventFlow = MutableSharedFlow<E>()
 
+    init {
+        // collect intents while this instance is alive
+        launch {
+            intentFlow.collect {
+                receive(intent = it)
+            }
+        }
+    }
+
     /**
      * Handles the provided [intent] to trigger business logic operations or state updates within the ViewModel.
      *
      * @param intent The [UIIntent] instance representing an action or event to be processed.
      */
     abstract suspend fun receive(intent: I)
+
+    /**
+     * Allows implementations to emit event to [eventFlow]. Handles the boilerplate of launching a coroutine
+     * on the main thread within the [viewModelScope].
+     */
+    protected fun emit(event: E) {
+        launch { eventFlow.emit(event) }
+    }
 
     /**
      * Updates the state of the ui state using a mutation function applied to the current state.
