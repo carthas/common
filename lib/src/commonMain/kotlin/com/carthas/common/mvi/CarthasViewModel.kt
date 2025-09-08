@@ -70,6 +70,13 @@ abstract class CarthasViewModel<S : UIState, I : UIIntent, E : UIEvent>(
     }
 
     /**
+     * Sets the current state in the [screenStateFlow] using the value produced by the [stateProducer] function.
+     *
+     * @param stateProducer A function that produces a new state of type [S] to replace the current state.
+     */
+    fun setState(stateProducer: () -> S) = screenStateFlow.update { stateProducer() }
+
+    /**
      * Updates the state of the ui state using a mutation function applied to the current state.
      *
      * @param SubState A subtype of the current UI state [S].
